@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="80bf1cf8-127d-41df-b6ff-3b89d7fbb964" name="Changes" comment="Preloading files functionality added">
+    <list default="true" id="80bf1cf8-127d-41df-b6ff-3b89d7fbb964" name="Changes" comment="Major bug fixes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detector_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/detector_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gamma_spectrum.py" beforeDir="false" afterPath="$PROJECT_DIR$/gamma_spectrum.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -36,18 +34,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.detector_manager.executor": "Run",
-    "Python.file_processing.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.misc.executor": "Run",
-    "Python.subtract_background.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "D:/Anton/Projects/HPGe processing"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.detector_manager.executor&quot;: &quot;Run&quot;,
+    &quot;Python.file_processing.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.misc.executor&quot;: &quot;Run&quot;,
+    &quot;Python.subtract_background.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Anton/Projects/HPGe processing&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Python.detector_manager">
     <configuration name="detector_manager" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="pythonProject1" />
@@ -194,7 +192,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740517097337</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Major bug fixes">
+      <option name="closed" value="true" />
+      <created>1740522072858</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1740522072858</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -213,6 +219,7 @@
     <MESSAGE value="Detector energy calibration added" />
     <MESSAGE value="Before introducing :preloading: files" />
     <MESSAGE value="Preloading files functionality added" />
-    <option name="LAST_COMMIT_MESSAGE" value="Preloading files functionality added" />
+    <MESSAGE value="Major bug fixes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Major bug fixes" />
   </component>
 </project>
