@@ -55,16 +55,16 @@ class GammaSpectrum:
             self.channels = [i for i in range(self.length)]
 
             if self.detector.energy_scale:
-                fill_energies()
+                self.fill_energies()
         else:
             if self.file_extension == ".csv":
                 file_channels, file_counts = zip(*[line.split(CSV_DELIMITER) for line in lines])
-                self.channels = list(map(int, file_channels))
+                self.channels = list(map(float, file_channels))
                 self.counts = list(map(float, file_counts))
         return self
 
     def fill_energies(self):
-        self.energies = self.detector.energy_scale[:self.channels]
+        self.energies = self.detector.energy_scale[:self.length]
 
     def update_times(self, new_times: list) -> None:
         """
@@ -82,8 +82,9 @@ class GammaSpectrum:
 
     def save_raw(self, out_directory: str, output_energies=False) -> None:
         data = self.energies if output_energies else self.channels
-        name_suffix = "_RAW.csv"
-        out_filename = self.name[:-4] + name_suffix
+        data_type = "_energies" if output_energies else ""
+        name_suffix = f"{data_type}_RAW.csv"
+        out_filename = self.name + name_suffix
         out_path = os.path.join(out_directory, out_filename)
 
         with open(out_path, "w", newline='') as f:

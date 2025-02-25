@@ -4,15 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="80bf1cf8-127d-41df-b6ff-3b89d7fbb964" name="Changes" comment="New classes added, old files pending deletion">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/plotter.py" afterDir="false" />
+    <list default="true" id="80bf1cf8-127d-41df-b6ff-3b89d7fbb964" name="Changes" comment="Detector energy calibration added">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detector_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/detector_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/file_processing.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/gamma_spectrum.py" beforeDir="false" afterPath="$PROJECT_DIR$/gamma_spectrum.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/misc.py" beforeDir="false" afterPath="$PROJECT_DIR$/misc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reader.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/subtract_background.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sum_ALL_files.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,18 +39,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.file_processing.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.misc.executor": "Run",
-    "Python.subtract_background.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "D:/Anton/Projects/HPGe processing"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.file_processing.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.misc.executor&quot;: &quot;Run&quot;,
+    &quot;Python.subtract_background.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Anton/Projects/HPGe processing&quot;
   }
-}]]></component>
-  <component name="RunManager" selected="Python.misc">
+}</component>
+  <component name="RunManager" selected="Python.main">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="pythonProject1" />
       <option name="ENV_FILES" value="" />
@@ -121,8 +120,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.misc" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.misc" />
       </list>
     </recent_temporary>
   </component>
@@ -150,7 +149,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740484943656</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Detector energy calibration added">
+      <option name="closed" value="true" />
+      <created>1740503166627</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1740503166627</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -166,16 +173,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="New classes added, old files pending deletion" />
-    <option name="LAST_COMMIT_MESSAGE" value="New classes added, old files pending deletion" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/file_processing.py</url>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="Detector energy calibration added" />
+    <option name="LAST_COMMIT_MESSAGE" value="Detector energy calibration added" />
   </component>
 </project>

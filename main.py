@@ -11,12 +11,14 @@ print(config.logo)
 
 processor = SpectrumProcessor()
 plotter = Plotter()
+spectra = []
 
+iteration = 0
 while True:
-    print("\n[1] Sum spectra\n"
-          "[2] Subtract background\n"
-          "[3] Clear header and footer\n"
-          "[4] Convert to energy scale"
+    print("\n[1] Load spectra"
+          "[2] Sum spectra\n"
+          "[3] Subtract background\n"
+          "[4] Add channels/energies; remove header and footer\n"
           "[5] Plot spectra\n"
           "[q] Quit")
     command = input(": ").strip().lower()
@@ -61,12 +63,12 @@ while True:
             spectra = processor.load_multiple_spectra(path)
             if spectra:
                 filenames = [s.name for s in spectra]
-                print(f"Headers and footers will be cleaned from {len(filenames)} files:")
-
+                print(f"{len(filenames)} files will be processed.")
+                use_energy_scale = input("Output energy scale? [y/n]: ").strip().lower()
                 for spectrum in spectra:
-                    out_directory = config.save_paths["raw_files"][spectrum.detector.value]
-                    spectrum.save_raw(out_directory=out_directory)
-        case "5":
+                    out_directory = config.save_paths["raw_files"][spectrum.detector.type]
+                    spectrum.save_raw(out_directory=out_directory, output_energies=use_energy_scale == "y")
+        case "4":
             n_spectra = int(input("How many spectra to plot?: ").strip())
             spectra = []
             for i in range(n_spectra):
