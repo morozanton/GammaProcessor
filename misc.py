@@ -10,11 +10,11 @@ def get_detector_from_filename(filename: str) -> DetectorType | None:
     return None
 
 
-def get_filenames(directory: str, extension: str = None) -> list[str]:
+def get_filenames(directory: str, *extension: str) -> list[str]:
     if extension:
         files = []
         for file in os.listdir(directory):
-            if os.path.splitext(os.path.basename(file))[1].lower() == extension.lower():
+            if os.path.splitext(os.path.basename(file))[1].lower() in [ext.lower() for ext in extension]:
                 files.append(file)
         return files
     return os.listdir(directory)

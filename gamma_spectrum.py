@@ -71,7 +71,9 @@ class GammaSpectrum:
         Replaces the data acquisition times in the GammaDetector's header
         :param new_times: Values for replacing the existing times
         """
+        print(self.header[self.TIME_LINE-1:self.TIME_LINE+1])
         self.header[self.TIME_LINE] = f"{new_times[0]} {new_times[1]}"
+        print(self.header[self.TIME_LINE-1:self.TIME_LINE+1])
 
     def save_spe(self, out_path: str) -> None:
         with open(out_path, "w") as f:
@@ -102,12 +104,12 @@ class SpectrumProcessor:
         path = path.strip('"')
 
         if os.path.isdir(path):
-            for filename in misc.get_filenames(path, extension=".Spe"):
+            for filename in misc.get_filenames(path, ".Spe", ".csv"):
                 spectra.append(GammaSpectrum().load(os.path.join(path, filename)))
         elif os.path.isfile(path):
             spectra.append(GammaSpectrum().load(path))
         else:
-            print(f"No .Spe files found in {path}")
+            print(f"No .Spe or .csv files found in {path}")
             return None
         return spectra
 
@@ -122,7 +124,7 @@ class SpectrumProcessor:
         """
 
         def get_file_number(file) -> str:
-            return re.search(r"\s(\d{3})\.", file).group(1)
+            return re.search(r"(\d{3})", file).group(1)
 
         result = GammaSpectrum()
         for i, spectrum in enumerate(spectra):
@@ -141,6 +143,7 @@ class SpectrumProcessor:
                 result.update_times(result.times)
                 name_suffix = get_file_number(spectrum.name)
                 result.name = f"SumSpectra{result.detector.name}{name_modifier}-{name_prefix}_to_{name_suffix}.Spe"
+        print(result.times)
         return result
 
     @staticmethod

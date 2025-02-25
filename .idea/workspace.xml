@@ -4,14 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="80bf1cf8-127d-41df-b6ff-3b89d7fbb964" name="Changes" comment="Detector energy calibration added">
+    <list default="true" id="80bf1cf8-127d-41df-b6ff-3b89d7fbb964" name="Changes" comment="Before introducing :preloading: files">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/file_processing.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/gamma_spectrum.py" beforeDir="false" afterPath="$PROJECT_DIR$/gamma_spectrum.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reader.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/subtract_background.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sum_ALL_files.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/misc.py" beforeDir="false" afterPath="$PROJECT_DIR$/misc.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -157,7 +154,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740503166627</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Before introducing :preloading: files">
+      <option name="closed" value="true" />
+      <created>1740512974550</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1740512974551</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -174,6 +179,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="New classes added, old files pending deletion" />
     <MESSAGE value="Detector energy calibration added" />
-    <option name="LAST_COMMIT_MESSAGE" value="Detector energy calibration added" />
+    <MESSAGE value="Before introducing :preloading: files" />
+    <option name="LAST_COMMIT_MESSAGE" value="Before introducing :preloading: files" />
   </component>
 </project>

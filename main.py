@@ -3,47 +3,60 @@ from misc import get_filenames
 import os
 import config
 from plotter import Plotter
+import re
 
 """
 (!) Edit the config.py file to use correct file paths
 """
+
+
+def load_files(input_path: str) -> list | GammaSpectrum:
+    if os.path.isdir(input_path):
+        files = get_filenames(input_path, ".Spe", ".csv")
+        if files:
+            return processor.load_multiple_spectra(input_path)
+    elif os.path.isfile(input_path):
+        return GammaSpectrum().load(input_path)
+
+
 print(config.logo)
 
 processor = SpectrumProcessor()
 plotter = Plotter()
-spectra = []
 
 iteration = 0
 while True:
-    print("\n[1] Load spectra"
-          "[2] Sum spectra\n"
-          "[3] Subtract background\n"
-          "[4] Add channels/energies; remove header and footer\n"
-          "[5] Plot spectra\n"
+    if iteration == 0:
+        spectra = [sp for sp in load_files(input("Path to a spectrum file/directory: ").strip('"'))]
+    print(f"Loaded files: {[sp.name for sp in spectra]}")
+
+    print("\n[1] Sum spectra\n"
+          "[2] Subtract background\n"
+          "[3] Add channels/energies; remove header and footer\n"
+          "[4] Plot spectra\n"
+          "[5] Load new spectra\n"
           "[q] Quit")
-    command = input(": ").strip().lower()
+    command = input("---> ").strip().lower()
     match command:
         case "1":
             # Sum all .Spe files in a specified directory
-            directory = input("Path to a directory with .Spe files to sum: ").strip('"')
-            if os.path.isdir(directory):
-                filenames = get_filenames(directory, extension=".Spe")
-                if filenames:
-                    print(f"Found {len(filenames)} files to sum.")
-                    spectra = processor.load_multiple_spectra(directory)
+            if any(sp.file_extension == ".Spe" for sp in spectra):
+                valid_spectra = [sp for sp in spectra if sp.file_extension == ".Spe"]
+                print(f"The following files will be summed: ")
+                for sp in valid_spectra:
+                    print(f"{sp.name}{sp.file_extension}")
 
-                    shot_name = filenames[0].split()[0]
-                    detector = spectra[0].detector
+                shot_name = re.match(r"Shot_\d+", valid_spectra[0].name).group(0)
+                detector = spectra[0].detector
 
-                    result = processor.sum_spectra(spectra, name_modifier=shot_name)
-                    out_path = config.save_paths["sum_spectra"][result.detector.value]
-                    prompt = input(f"Save {result.name} to {out_path}? [y/n]: ").strip().lower()
-                    if prompt == "y":
-                        result.save_spe(os.path.join(out_path, result.name))
-                else:
-                    print(f"No .Spe files found in {directory}")
+                result = processor.sum_spectra(spectra, name_modifier=shot_name)
+                out_path = config.save_paths["sum_spectra"][result.detector.type]
+                prompt = input(f"Save {result.name} to {out_path}? [y/n]: ").strip().lower()
+                if prompt == "y":
+                    result.save_spe(os.path.join(out_path, result.name))
             else:
-                print(directory, "is not a directory")
+                print(f"No .Spe files found to sum.")
+
         case "2":
             path = input("Enter the path to the spectrum to subtract background from.\nOR\n"
                          "Enter a path to a directory to treat all .Spe files inside: ")
@@ -76,8 +89,8 @@ while True:
                 spectra.append(GammaSpectrum().load(path.strip('"')))
 
             plotter.scatter(*spectra)
-        case "99":
-            print("TEST MODE", end="-" * 10 + "\n")
-            GammaSpectrum().load("D:\Anton\Desktop (D)\Shots_processing\Calibration\BigDet-MixSource.Spe")
+        case "5":
+            spectra = [sp for sp in load_files(input("Path to a spectrum file/directory: ").strip('"'))]
         case "q":
             break
+    iteration += 1
