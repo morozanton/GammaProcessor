@@ -2,6 +2,7 @@ from gamma_spectrum import GammaSpectrum, SpectrumProcessor
 from misc import get_filenames
 import os
 import config
+from plotter import Plotter
 
 """
 (!) Edit the config.py file to use correct file paths
@@ -9,11 +10,14 @@ import config
 print(config.logo)
 
 processor = SpectrumProcessor()
+plotter = Plotter()
 
 while True:
     print("\n[1] Sum spectra\n"
           "[2] Subtract background\n"
           "[3] Clear header and footer\n"
+          "[4] Convert to energy scale"
+          "[5] Plot spectra\n"
           "[q] Quit")
     command = input(": ").strip().lower()
     match command:
@@ -23,7 +27,7 @@ while True:
             if os.path.isdir(directory):
                 filenames = get_filenames(directory, extension=".Spe")
                 if filenames:
-                    print(f"{len(filenames)} .Spe files to sum.")
+                    print(f"Found {len(filenames)} files to sum.")
                     spectra = processor.load_multiple_spectra(directory)
 
                     shot_name = filenames[0].split()[0]
@@ -62,6 +66,16 @@ while True:
                 for spectrum in spectra:
                     out_directory = config.save_paths["raw_files"][spectrum.detector.value]
                     spectrum.save_raw(out_directory=out_directory)
+        case "5":
+            n_spectra = int(input("How many spectra to plot?: ").strip())
+            spectra = []
+            for i in range(n_spectra):
+                path = input(f"Spectrum {i + 1} path: ")
+                spectra.append(GammaSpectrum().load(path.strip('"')))
 
+            plotter.scatter(*spectra)
+        case "99":
+            print("TEST MODE", end="-" * 10 + "\n")
+            GammaSpectrum().load("D:\Anton\Desktop (D)\Shots_processing\Calibration\BigDet-MixSource.Spe")
         case "q":
             break

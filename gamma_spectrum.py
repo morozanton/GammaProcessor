@@ -26,28 +26,45 @@ class GammaSpectrum:
         self.length = None
         self.channels = None
         self.energies = None
+        self.file_extension = None
 
     def load(self, path: str):
         """
         Loads a new GammaSpectrum from an .Spe file, pre-filling its properties
+        :param delimiter:
         :param path: The path to the .Spe file
         :return:
         """
-        self.name = path.split('\\')[-1]  # TODO: check for path rules for different OS
+        CSV_DELIMITER = ","
 
-        self.detector = misc.get_detector_from_filename(path)
+        self.name, self.file_extension = os.path.splitext(
+            os.path.basename(path))
+
+        self.detector = Detector(misc.get_detector_from_filename(path))
 
         with open(path) as f:
             lines = f.read().splitlines()
 
-        self.header = lines[:self.HEADER_LEN]
-        self.footer = lines[-self.FOOTER_LEN:]
-        self.times = list(map(int, lines[9].split()))
+        if self.file_extension == ".Spe":
+            self.header = lines[:self.HEADER_LEN]
+            self.footer = lines[-self.FOOTER_LEN:]
+            self.times = list(map(int, lines[9].split()))
 
-        self.counts = [int(line) for line in lines[self.HEADER_LEN:-self.FOOTER_LEN]]
-        self.length = len(self.counts)
-        self.channels = [i for i in range(self.length)]
+            self.counts = [int(line) for line in lines[self.HEADER_LEN:-self.FOOTER_LEN]]
+            self.length = len(self.counts)
+            self.channels = [i for i in range(self.length)]
+
+            if self.detector.energy_scale:
+                fill_energies()
+        else:
+            if self.file_extension == ".csv":
+                file_channels, file_counts = zip(*[line.split(CSV_DELIMITER) for line in lines])
+                self.channels = list(map(int, file_channels))
+                self.counts = list(map(float, file_counts))
         return self
+
+    def fill_energies(self):
+        self.energies = self.detector.energy_scale[:self.channels]
 
     def update_times(self, new_times: list) -> None:
         """
@@ -55,9 +72,6 @@ class GammaSpectrum:
         :param new_times: Values for replacing the existing times
         """
         self.header[self.TIME_LINE] = f"{new_times[0]} {new_times[1]}"
-
-    def apply_calibration(self, calibration):
-        self.energies = None
 
     def save_spe(self, out_path: str) -> None:
         with open(out_path, "w") as f:
@@ -125,7 +139,7 @@ class SpectrumProcessor:
             if i == len(spectra) - 1:
                 result.update_times(result.times)
                 name_suffix = get_file_number(spectrum.name)
-                result.name = f"SumSpectra{result.detector.value}{name_modifier}-{name_prefix}_to_{name_suffix}.Spe"
+                result.name = f"SumSpectra{result.detector.name}{name_modifier}-{name_prefix}_to_{name_suffix}.Spe"
         return result
 
     @staticmethod
@@ -140,11 +154,13 @@ class SpectrumProcessor:
         background_spectrum = GammaSpectrum().load(detector.bg_path)
 
         result = GammaSpectrum()
-        result.detector = detector.type
+        result.detector = detector
         result.channels = spectrum.channels
 
         scaling_factor = spectrum.times[0] / detector.bg_times[0]
+
         result.counts = [max(0, (spec - bg * scaling_factor)) for spec, bg in
                          zip(spectrum.counts, background_spectrum.counts)]
+
         result.name = f"{spectrum.name}_BG_SUBTRACTED.txt"
         return result
