@@ -13,3 +13,4 @@ class Detector:
         self.intercept = config.detectors[self.type]["energy_calibration"]["intercept"]
         self.slope = config.detectors[self.type]["energy_calibration"]["slope"]
         self.energy_scale = [self.intercept + self.slope * channel for channel in range(self.CHANNELS)]
+

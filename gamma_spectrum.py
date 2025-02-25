@@ -12,9 +12,10 @@ class GammaSpectrum:
     """
     A GammaSpectrum object used for spectrum processing
     """
-    HEADER_LEN = config.spectra_files["header_len"]
-    FOOTER_LEN = config.spectra_files["footer_len"]
     TIME_LINE = config.spectra_files["time_line"]
+
+    HEADER_END = config.spectra_files["header_end"]
+    FOOTER_START = config.spectra_files["footer_start"]
 
     def __init__(self):
         self.name = None
@@ -27,6 +28,8 @@ class GammaSpectrum:
         self.channels = None
         self.energies = None
         self.file_extension = None
+        self.header_end_index = None
+        self.footer_start_index = None
 
     def load(self, path: str):
         """
@@ -46,21 +49,29 @@ class GammaSpectrum:
             lines = f.read().splitlines()
 
         if self.file_extension == ".Spe":
-            self.header = lines[:self.HEADER_LEN]
-            self.footer = lines[-self.FOOTER_LEN:]
-            self.times = list(map(int, lines[9].split()))
+            self.header_end_index = next((i for i, line in enumerate(lines) if
+                                          self.HEADER_END in line)) + 2
+            # +2 Because there is one more extra header line after the $Data line
+            # plus the $Data line should also be incuded
+            self.footer_start_index = next((i for i, line in enumerate(lines[::-1]) if
+                                            self.FOOTER_START in line)) + 1
+            # +1 because the $ROI line should also be included
 
-            self.counts = [int(line) for line in lines[self.HEADER_LEN:-self.FOOTER_LEN]]
+            self.header = lines[:self.header_end_index]
+            self.footer = lines[-self.footer_start_index:]
+
+            self.times = list(map(int, lines[self.TIME_LINE].split()))
+
+            self.counts = [int(line) for line in lines[self.header_end_index:-self.footer_start_index]]
             self.length = len(self.counts)
             self.channels = [i for i in range(self.length)]
-
-            if self.detector.energy_scale:
-                self.fill_energies()
         else:
             if self.file_extension == ".csv":
                 file_channels, file_counts = zip(*[line.split(CSV_DELIMITER) for line in lines])
                 self.channels = list(map(float, file_channels))
                 self.counts = list(map(float, file_counts))
+        if self.detector.energy_scale:
+            self.fill_energies()
         return self
 
     def fill_energies(self):
@@ -71,9 +82,7 @@ class GammaSpectrum:
         Replaces the data acquisition times in the GammaDetector's header
         :param new_times: Values for replacing the existing times
         """
-        print(self.header[self.TIME_LINE-1:self.TIME_LINE+1])
         self.header[self.TIME_LINE] = f"{new_times[0]} {new_times[1]}"
-        print(self.header[self.TIME_LINE-1:self.TIME_LINE+1])
 
     def save_spe(self, out_path: str) -> None:
         with open(out_path, "w") as f:
@@ -136,14 +145,17 @@ class SpectrumProcessor:
                 result.counts = spectrum.counts
                 result.times = spectrum.times
             else:
-                result.counts = np.add(np.array(result.counts), np.array(spectrum.counts))
-                result.times = np.add(np.array(result.times), np.array(spectrum.times))
+                try:
+                    result.counts = np.add(np.array(result.counts), np.array(spectrum.counts))
+                    result.times = np.add(np.array(result.times), np.array(spectrum.times))
+                except:
+                    print(spectrum.name, len(spectrum.counts))
+                    exit(1)
 
             if i == len(spectra) - 1:
                 result.update_times(result.times)
                 name_suffix = get_file_number(spectrum.name)
                 result.name = f"SumSpectra{result.detector.name}{name_modifier}-{name_prefix}_to_{name_suffix}.Spe"
-        print(result.times)
         return result
 
     @staticmethod
@@ -154,7 +166,7 @@ class SpectrumProcessor:
         :param detector_type: a DetectorType to select a corresponding background spectrum
         :return: The GammaSpectrum with subtracted background
         """
-        detector = Detector(spectrum.detector)
+        detector = spectrum.detector
         background_spectrum = GammaSpectrum().load(detector.bg_path)
 
         result = GammaSpectrum()
@@ -166,5 +178,6 @@ class SpectrumProcessor:
         result.counts = [max(0, (spec - bg * scaling_factor)) for spec, bg in
                          zip(spectrum.counts, background_spectrum.counts)]
 
-        result.name = f"{spectrum.name}_BG_SUBTRACTED.txt"
+        result.name = f"{spectrum.name}_BG_SUBTRACTED"
+        result.file_extension = ".csv"
         return result

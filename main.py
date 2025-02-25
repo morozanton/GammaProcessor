@@ -27,10 +27,13 @@ plotter = Plotter()
 iteration = 0
 while True:
     if iteration == 0:
+        print()
         spectra = [sp for sp in load_files(input("Path to a spectrum file/directory: ").strip('"'))]
-    print(f"Loaded files: {[sp.name for sp in spectra]}")
-
-    print("\n[1] Sum spectra\n"
+    print(f"\nLoaded files:")
+    print("-" * 30)
+    print(*[sp.name for sp in spectra], sep="\n")
+    print("-" * 30)
+    print("[1] Sum spectra\n"
           "[2] Subtract background\n"
           "[3] Add channels/energies; remove header and footer\n"
           "[4] Plot spectra\n"
@@ -58,25 +61,18 @@ while True:
                 print(f"No .Spe files found to sum.")
 
         case "2":
-            path = input("Enter the path to the spectrum to subtract background from.\nOR\n"
-                         "Enter a path to a directory to treat all .Spe files inside: ")
-            spectra = processor.load_multiple_spectra(path)
             if spectra:
                 filenames = [s.name for s in spectra]
                 print(f"Background will be subtracted from {len(filenames)} files")
                 for spectrum in spectra:
                     result = processor.subtract_background(spectrum=spectrum)
 
-                    out_directory = config.save_paths["subtracted_bg"][result.detector.value]
+                    out_directory = config.save_paths["subtracted_bg"][result.detector.type]
                     out_path = os.path.join(out_directory, result.name)
                     result.save_raw(out_directory)
         case "3":
-            path = input("Enter the path to the spectrum to process.\nOR\n"
-                         "Enter a path to a directory to treat all .Spe files inside: ")
-            spectra = processor.load_multiple_spectra(path)
             if spectra:
-                filenames = [s.name for s in spectra]
-                print(f"{len(filenames)} files will be processed.")
+                print(f"{len(spectra)} files will be processed.")
                 use_energy_scale = input("Output energy scale? [y/n]: ").strip().lower()
                 for spectrum in spectra:
                     out_directory = config.save_paths["raw_files"][spectrum.detector.type]
@@ -91,6 +87,28 @@ while True:
             plotter.scatter(*spectra)
         case "5":
             spectra = [sp for sp in load_files(input("Path to a spectrum file/directory: ").strip('"'))]
+        case "99":
+            # Sum up files for each shot from a given detector
+            root = "D:\Anton\Desktop (D)\Shots\Small_Det"
+            dirs = os.listdir(root)
+            for direct in dirs:
+                direct = os.path.join(root, direct, "Messungen")
+                spectra = load_files(direct)
+                if spectra:
+                    valid_spectra = [sp for sp in spectra if sp.file_extension == ".Spe"]
+                    print(f"The following files will be summed: ")
+                    print(f"{valid_spectra[0].name}{valid_spectra[0].file_extension}")
+                    print("to")
+                    print(f"{valid_spectra[-1].name}{valid_spectra[-1].file_extension}")
+                    shot_name = re.match(r"Shot_\d+", valid_spectra[0].name).group(0)
+                    detector = spectra[0].detector
+
+                    result = processor.sum_spectra(spectra, name_modifier=shot_name)
+                    out_path = config.save_paths["sum_spectra"][result.detector.type]
+                    result.save_spe(os.path.join(out_path, result.name))
+                    print(f"{result.name} saved at {out_path}")
         case "q":
             break
+        case _:
+            continue
     iteration += 1
