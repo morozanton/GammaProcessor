@@ -29,9 +29,10 @@ while True:
     if iteration == 0:
         print()
         spectra = load_files(input("Path to a spectrum file/directory: ").strip('"'))
-    print(f"\nLoaded files:")
+    print(f"\nCurrent files:")
     print("-" * 30)
-    print(*[sp.name for sp in spectra], sep="\n")
+    for i, sp in enumerate(spectra):
+        print(f"{i + 1}. {sp.name}")
     print("-" * 30)
     print("[1] Sum spectra\n"
           "[2] Subtract background\n"
@@ -48,15 +49,14 @@ while True:
                 valid_spectra = [sp for sp in spectra if sp.file_extension == ".Spe"]
                 names = [sp.name for sp in valid_spectra]
 
-                print(f"The following files will be summed: ")
-                for sp in valid_spectra:
-                    print(f"{sp.name}{sp.file_extension}")
+                print(f"The files from {valid_spectra[0].name} to {valid_spectra[-1].name} will be summed")
 
                 shot_names = {match.group() for name in names if (match := re.search(r"Shot_\d+", name))}
+                sorted_names = sorted(shot_names, key=lambda x: int(x.split("_")[1]))
                 if len(shot_names) > 1:
-                    shot_name = "+".join(shot_names)
+                    shot_name = "+".join(sorted_names)
                 elif len(shot_names) == 1:
-                    shot_name = shot_names[0]
+                    shot_name = sorted_names[0]
                 else:
                     shot_name = None
 
@@ -65,20 +65,22 @@ while True:
                 out_path = config.save_paths["sum_spectra"][result.detector.type]
                 prompt = input(f"Save {result.name} to {out_path}? [y/n]: ").strip().lower()
                 if prompt == "y":
-                    result.save_spe(os.path.join(out_path, result.name))
+                    result.save_spe(os.path.join(out_path, f"{result.name}{result.file_extension}"))
+                spectra = [result]
             else:
                 print(f"No .Spe files found to sum.")
 
         case "2":
             if spectra:
-                filenames = [s.name for s in spectra]
-                print(f"Background will be subtracted from {len(filenames)} files")
+                processed_spectra = []
+                print(f"Background will be subtracted from {len(spectra)} files")
                 for spectrum in spectra:
                     result = processor.subtract_background(spectrum=spectrum)
-
                     out_directory = config.save_paths["subtracted_bg"][result.detector.type]
                     out_path = os.path.join(out_directory, result.name)
                     result.save_raw(out_directory)
+                    processed_spectra.append(result)
+                spectra = processed_spectra
         case "3":
             if spectra:
                 print(f"{len(spectra)} files will be processed.")
@@ -86,6 +88,9 @@ while True:
                 for spectrum in spectra:
                     out_directory = config.save_paths["raw_files"][spectrum.detector.type]
                     spectrum.save_raw(out_directory=out_directory, output_energies=use_energy_scale == "y")
+
+                spectra = load_files((input("\nAll files are processed. Load new files to process?"
+                                            "\nPath to a spectrum file/directory: ").strip('"')))
         case "4":
             n_spectra = int(input("How many spectra to plot?: ").strip())
             spectra = []

@@ -64,7 +64,7 @@ class GammaSpectrum:
 
             self.counts = [int(line) for line in lines[self.header_end_index:-self.footer_start_index]]
             self.length = len(self.counts)
-            self.channels = [i for i in range(self.length)]
+            self.fill_channels()
         else:
             if self.file_extension == ".csv":
                 file_channels, file_counts = zip(*[line.split(CSV_DELIMITER) for line in lines])
@@ -73,6 +73,13 @@ class GammaSpectrum:
         if self.detector.energy_scale:
             self.fill_energies()
         return self
+
+    def fill_channels(self):
+        """
+        Fills the spectrum channels
+        :return:
+        """
+        self.channels = list(range(len(self.counts)))
 
     def fill_energies(self):
         self.energies = self.detector.energy_scale[:self.length]
@@ -97,7 +104,6 @@ class GammaSpectrum:
         name_suffix = f"{data_type}_RAW.csv"
         out_filename = self.name + name_suffix
         out_path = os.path.join(out_directory, out_filename)
-
         with open(out_path, "w", newline='') as f:
             writer = csv.writer(f)
             for d, cnt in zip(data, self.counts):
@@ -145,17 +151,15 @@ class SpectrumProcessor:
                 result.counts = spectrum.counts
                 result.times = spectrum.times
             else:
-                try:
-                    result.counts = np.add(np.array(result.counts), np.array(spectrum.counts))
-                    result.times = np.add(np.array(result.times), np.array(spectrum.times))
-                except:
-                    print(spectrum.name, len(spectrum.counts))
-                    exit(1)
+                result.counts = np.add(np.array(result.counts), np.array(spectrum.counts))
+                result.times = np.add(np.array(result.times), np.array(spectrum.times))
 
             if i == len(spectra) - 1:
                 result.update_times(result.times)
                 name_suffix = get_file_number(spectrum.name)
-                result.name = f"SumSpectra{result.detector.name}{name_modifier}-{name_prefix}_to_{name_suffix}.Spe"
+                result.name = f"SumSpectra{result.detector.name}{name_modifier}-{name_prefix}_to_{name_suffix}"
+                result.file_extension = ".Spe"
+        result.fill_channels()
         return result
 
     @staticmethod
@@ -177,7 +181,7 @@ class SpectrumProcessor:
 
         result.counts = [max(0, (spec - bg * scaling_factor)) for spec, bg in
                          zip(spectrum.counts, background_spectrum.counts)]
-
+        result.fill_energies()
         result.name = f"{spectrum.name}_BG_SUBTRACTED"
         result.file_extension = ".csv"
         return result

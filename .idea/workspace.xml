@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="80bf1cf8-127d-41df-b6ff-3b89d7fbb964" name="Changes" comment="Major bug fixes">
+    <list default="true" id="80bf1cf8-127d-41df-b6ff-3b89d7fbb964" name="Changes" comment="additional file loading added">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gamma_spectrum.py" beforeDir="false" afterPath="$PROJECT_DIR$/gamma_spectrum.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -200,7 +201,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740522072858</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="additional file loading added">
+      <option name="closed" value="true" />
+      <created>1740524903632</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1740524903632</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -220,6 +229,7 @@
     <MESSAGE value="Before introducing :preloading: files" />
     <MESSAGE value="Preloading files functionality added" />
     <MESSAGE value="Major bug fixes" />
-    <option name="LAST_COMMIT_MESSAGE" value="Major bug fixes" />
+    <MESSAGE value="additional file loading added" />
+    <option name="LAST_COMMIT_MESSAGE" value="additional file loading added" />
   </component>
 </project>
