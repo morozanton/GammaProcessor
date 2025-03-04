@@ -4,6 +4,7 @@ import misc
 import config
 import csv
 from config import DetectorType
+from scipy.ndimage import gaussian_filter1d
 from detector_manager import Detector
 import os
 
@@ -74,6 +75,18 @@ class GammaSpectrum:
             self.fill_energies()
         return self
 
+    def apply_filtering(self):
+        def estimate_noise(spectrum):
+            diffs = np.diff(spectrum)  # Разности соседних значений
+            noise_level = np.median(np.abs(diffs)) / 0.6745  # Оценка стандартного отклонения шума
+            return noise_level
+
+        print(f"Initial noise level: {estimate_noise(self.counts):.2f}")
+        print("Filtering data...")
+        self.counts = gaussian_filter1d(self.counts, sigma=1)
+        self.name += "_GAUSS_smooth"
+        print(f"Resulting noise level: {estimate_noise(self.counts):.2f}")
+
     def fill_channels(self):
         """
         Fills the spectrum channels
@@ -92,18 +105,24 @@ class GammaSpectrum:
         self.header[self.TIME_LINE] = f"{new_times[0]} {new_times[1]}"
 
     def save_spe(self, out_path: str) -> None:
+        if not os.path.exists(os.path.dirname(out_path)):
+            os.makedirs(os.path.dirname(out_path))
+
         with open(out_path, "w") as f:
             f.writelines(line + "\n" for line in self.header)
             f.writelines(line + "\n" for line in map(str, self.counts))
             f.writelines(line + "\n" for line in self.footer)
+
         print(f"File saved: {out_path}")
 
-    def save_raw(self, out_directory: str, output_energies=False) -> None:
+    def save_raw(self, out_directory: str, output_energies=False, filename_suffix="") -> None:
         data = self.energies if output_energies else self.channels
         data_type = "_energies" if output_energies else ""
-        name_suffix = f"{data_type}_RAW.csv"
+        name_suffix = f"{data_type}_PROCESSED{filename_suffix}.csv"
         out_filename = self.name + name_suffix
         out_path = os.path.join(out_directory, out_filename)
+        if not os.path.exists(out_directory):
+            os.makedirs(out_directory)
         with open(out_path, "w", newline='') as f:
             writer = csv.writer(f)
             for d, cnt in zip(data, self.counts):
@@ -163,13 +182,15 @@ class SpectrumProcessor:
         return result
 
     @staticmethod
-    def subtract_background(spectrum: GammaSpectrum) -> GammaSpectrum:
+    def subtract_background(spectrum: GammaSpectrum, significance=0) -> GammaSpectrum:
         """
         Subtracts background from a GammaSpectrum based on the detector type
+        :param significance: How to treat low numbers. If significance == 0, all counts below 0 are dropped.
+        When significance == 3, values below 3 sigma are dropped
         :param spectrum: A GammaSpectrum to subtract the background from
-        :param detector_type: a DetectorType to select a corresponding background spectrum
         :return: The GammaSpectrum with subtracted background
         """
+
         detector = spectrum.detector
         background_spectrum = GammaSpectrum().load(detector.bg_path)
 
@@ -178,10 +199,13 @@ class SpectrumProcessor:
         result.channels = spectrum.channels
 
         scaling_factor = spectrum.times[0] / detector.bg_times[0]
-
-        result.counts = [max(0, (spec - bg * scaling_factor)) for spec, bg in
+        threshold = significance ** 2  # Because count has to be > significance * sigma, and sigma = sqrt(count)
+        result.counts = [spec - bg * scaling_factor if spec - bg * scaling_factor >= threshold else 0 for spec, bg in
                          zip(spectrum.counts, background_spectrum.counts)]
+          
         result.fill_energies()
         result.name = f"{spectrum.name}_BG_SUBTRACTED"
+        if significance > 0:
+            result.name += f"_{significance}-sigma_significance"
         result.file_extension = ".csv"
         return result
