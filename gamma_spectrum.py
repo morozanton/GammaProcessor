@@ -182,6 +182,18 @@ class SpectrumProcessor:
         return result
 
     @staticmethod
+    def get_normalized_background(detector_type: DetectorType, spectrum_time: int | float) -> GammaSpectrum:
+        """
+        Normalizes the background for a given detector type to the given measurement time.
+        """
+        detector = Detector(detector_type)
+        background_spectrum = GammaSpectrum().load(detector.bg_path)
+        scaling_factor = spectrum_time / detector.bg_times[0]
+
+        background_spectrum.counts = list(map(lambda c: c * scaling_factor, background_spectrum.counts))
+        return background_spectrum
+
+    @staticmethod
     def subtract_background(spectrum: GammaSpectrum, significance=0) -> GammaSpectrum:
         """
         Subtracts background from a GammaSpectrum based on the detector type
@@ -202,7 +214,7 @@ class SpectrumProcessor:
         threshold = significance ** 2  # Because count has to be > significance * sigma, and sigma = sqrt(count)
         result.counts = [spec - bg * scaling_factor if spec - bg * scaling_factor >= threshold else 0 for spec, bg in
                          zip(spectrum.counts, background_spectrum.counts)]
-          
+
         result.fill_energies()
         result.name = f"{spectrum.name}_BG_SUBTRACTED"
         if significance > 0:

@@ -1,3 +1,4 @@
+from config import DetectorType
 from gamma_spectrum import GammaSpectrum, SpectrumProcessor
 from misc import get_filenames
 import os
@@ -165,10 +166,13 @@ while True:
             spectra = add_energies_remove_headers(spectra)
 
         case "5":
-            print("Plotting is currently unavailable")
+            spectra = filter_spectra(spectra)
 
         case "6":
-            spectra = filter_spectra(spectra)
+            prompt = input("Also plot background? [y/n]: ").strip().lower()
+
+            for spectrum in spectra:
+                plotter.plot_spectrum(spectrum, plot_background=prompt == "y")
 
         case "n":
             spectra = load_files(message="Path to a spectrum file/directory: ")
