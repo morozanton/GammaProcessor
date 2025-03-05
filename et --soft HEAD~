@@ -1,0 +1,65 @@
+[33mcommit 7a96861e8c06ba6dd45fe748ff4c54a60ab36acd[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m
+Author: Anton <morozanton@inbox.ru>
+Date:   Wed Mar 5 11:14:00 2025 +0100
+
+    Fixes applied, staged for push
+
+[33mcommit 18cdc2e2f6257f6d0cbef70a820ed944aad4d2ca[m
+Author: Anton <morozanton@inbox.ru>
+Date:   Tue Mar 4 16:20:48 2025 +0100
+
+    Spectrum filtering added, background significance treatment added
+
+[33mcommit 52246b207316c44b90f800acfd5c4f3e08d24282[m
+Author: Anton <morozanton@inbox.ru>
+Date:   Wed Feb 26 11:11:15 2025 +0100
+
+    main.py restructured with functions; bulk editing added
+
+[33mcommit a59aa1d01028f52ffbfb1859800cb1590055a616[m
+Author: Anton <morozanton@inbox.ru>
+Date:   Wed Feb 26 10:49:05 2025 +0100
+
+    Same spectra multiple processing fixed
+
+[33mcommit d79a377a81b973cf557388c8d02fc1e22c427dd8[m
+Author: Anton <morozanton@inbox.ru>
+Date:   Wed Feb 26 00:08:22 2025 +0100
+
+    additional file loading added
+
+[33mcommit 1f30d24847b1486ff16e49d1b0abc67af0c9f6df[m
+Author: Anton <morozanton@inbox.ru>
+Date:   Tue Feb 25 23:21:11 2025 +0100
+
+    Major bug fixes
+
+[33mcommit 9b429037da3e2ecbda368adfb9cf2822478838ab[m
+Author: Anton <morozanton@inbox.ru>
+Date:   Tue Feb 25 21:58:16 2025 +0100
+
+    Preloading files functionality added
+
+[33mcommit 561796f0c2689256773142f444ad12f8f0004bcc[m
+Author: Anton <morozanton@inbox.ru>
+Date:   Tue Feb 25 20:49:33 2025 +0100
+
+    Before introducing :preloading: files
+
+[33mcommit bf8e7784a4225a0df5200c3ff978ebbf986ec2d2[m
+Author: Anton <morozanton@inbox.ru>
+Date:   Tue Feb 25 18:06:04 2025 +0100
+
+    Detector energy calibration added
+
+[33mcommit 3c605c997453f637a95bba49529c162185e62dbd[m
+Author: Anton <morozanton@inbox.ru>
+Date:   Tue Feb 25 13:02:21 2025 +0100
+
+    New classes added, old files pending deletion
+
+[33mcommit e963dde254236a49db84adc142704c7295bf379a[m
+Author: Anton <morozanton@inbox.ru>
+Date:   Mon Feb 24 16:45:32 2025 +0100
+
+    Initial commit of messy files

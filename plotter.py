@@ -2,9 +2,12 @@ import matplotlib.pyplot as plt
 from gamma_spectrum import GammaSpectrum
 import numpy as np
 import math
+import plotly.express as px
 
 
 class Plotter:
+    colors = {"bigdet": "#FF9D23",
+              "smalldet": "#F93827"}
 
     @staticmethod
     def plot(*spectra: GammaSpectrum, energy_scale=False, **kwargs):
@@ -24,6 +27,10 @@ class Plotter:
 
         plt.legend()
         plt.show()
+
+    def plot_spectrum(self, spectrum: GammaSpectrum, scale="energy"):
+        if scale == "energy":
+            ...
 
 
 if __name__ == "__main__":
@@ -84,6 +91,7 @@ if __name__ == "__main__":
         plt.ylim(3, 2e6)
         plt.show()
 
+
     def plot_with_annotations(columns, color):
         # Создание фигуры и осей
         plt.figure(figsize=(10, 6))
@@ -131,6 +139,8 @@ if __name__ == "__main__":
         plt.xlim(0)
         plt.ylim(1, 600)
         plt.show()
+
+
     def simple_plot(path, color):
         data = read_csv(file_path, column_names=["Energy", "Count"])
         plt.plot(data["Energy"], data["Count"], color=graph_color, label="Energy calibration")
@@ -147,14 +157,11 @@ if __name__ == "__main__":
 
     file_path = r"D:\Anton\Desktop (D)\Shots_processing\Calibration\RAW\SmallDet-MixSource-after_experiment_BG_SUBTRACTED_channels_AND_energies.csv"
     graph_color = colors["smalldet"]
-    #data = read_csv(file_path, ["Energy", "Counts"], delimiter=",")
+    # data = read_csv(file_path, ["Energy", "Counts"], delimiter=",")
 
     plot_double_axes_with_annotations(read_csv(file_path, column_names=["Channel", "Counts", "Energy"]),
                                       color=graph_color)
 
-
     # simple_plot(file_path, graph_color)
-
-
 
     # plot_with_annotations(data, graph_color)

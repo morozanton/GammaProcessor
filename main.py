@@ -5,7 +5,6 @@ import config
 from plotter import Plotter
 import re
 import numpy as np
-import time
 
 """
 (!) Edit the config.py file to use correct file paths

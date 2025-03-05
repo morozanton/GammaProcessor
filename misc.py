@@ -1,6 +1,7 @@
 import os
 from config import DetectorType
 import numpy as np
+import re
 
 
 def get_sigma(count):
@@ -29,5 +30,5 @@ def get_filenames(directory: str, *extension: str) -> list[str]:
         for file in os.listdir(directory):
             if os.path.splitext(os.path.basename(file))[1].lower() in [ext.lower() for ext in extension]:
                 files.append(file)
-        return files
+        return sorted(files, key=lambda x: int(re.search(r"\d+", x).group(0)))
     return os.listdir(directory)

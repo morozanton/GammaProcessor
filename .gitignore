@@ -1,2 +1,4 @@
 config.py
 annotation_data.txt
+__pycache__/
+.idea/
