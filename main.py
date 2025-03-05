@@ -144,8 +144,8 @@ while True:
           "[2] Sum spectra\n"
           "[3] Subtract background\n"
           "[4] Add channels/energies; remove header and footer\n"
-          "[5] Plot spectra\n"
-          "[6] Apply Gauss signal filtering\n"
+          "[5] Apply Gauss signal filtering\n"
+          "[6] Plot spectra\n"
           "\n[n] Load NEW spectra\n"
           "[a] Load ADDITIONAL spectra\n"
           "\n[q] Quit")
@@ -170,9 +170,7 @@ while True:
 
         case "6":
             prompt = input("Also plot background? [y/n]: ").strip().lower()
-
-            for spectrum in spectra:
-                plotter.plot_spectrum(spectrum, plot_background=prompt == "y")
+            plotter.plot_spectrum(*spectra, plot_background=prompt == "y")
 
         case "n":
             spectra = load_files(message="Path to a spectrum file/directory: ")

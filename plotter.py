@@ -34,25 +34,22 @@ class Plotter:
     #     return pd.read_csv(path, sep=delimiter, names=column_names)
 
     @staticmethod
-    def plot_spectrum(spectrum: GammaSpectrum, scale="energy", plot_background=False):
+    def plot_spectrum(*spectra: GammaSpectrum, scale="energy", plot_background=False):
         if scale == "energy":
-            # data = self.read_csv(path=path, column_names=["energy", "count"])
             fig = go.Figure()
-            fig.add_trace(go.Scatter(
-                x=spectrum.energies,
-                y=spectrum.counts,
-                mode='lines',
-                name=spectrum.name,
-                line=dict(color=Plotter.colors[spectrum.detector.type]),
-                fill="tozeroy"
-            ))
+            for spectrum in spectra:
+                fig.add_trace(go.Scatter(
+                    x=spectrum.energies,
+                    y=spectrum.counts,
+                    mode='lines',
+                    name=spectrum.name,
+                    # line=dict(color=Plotter.colors[spectrum.detector.type]),
+                    fill="tozeroy"
+                ))
             if plot_background:
-                if spectrum.times:
-                    spectrum_time = spectrum.times[0]
-                else:
-                    spectrum_time = float(input("Spectrum measurement time is required for background plotting.\n"
-                                                "Enter the time (in sec.): ").strip())
-                background_spectrum = SpectrumProcessor().get_normalized_background(spectrum.detector.type,
+                spectrum_time = float(input("Spectrum measurement time is required for background plotting.\n"
+                                            "Enter the time (in sec.): ").strip())
+                background_spectrum = SpectrumProcessor().get_normalized_background(spectra[0].detector.type,
                                                                                     spectrum_time)
                 fig.add_trace(go.Scatter(
                     x=background_spectrum.energies,
@@ -64,9 +61,19 @@ class Plotter:
                 ))
 
             fig.update_layout(
-                title=spectrum.name,
-                xaxis_title="Energy (keV)",
-                yaxis_title="Counts"
+                xaxis=dict(
+                    title="Energy (keV)",
+                    title_font=dict(size=18),
+                    tickfont=dict(size=14)
+                ),
+                yaxis=dict(
+                    title="Counts",
+                    title_font=dict(size=18),
+                    tickfont=dict(size=14)
+                ),
+                legend=dict(
+                    font=dict(size=16)
+                )
             )
 
             fig.show()
