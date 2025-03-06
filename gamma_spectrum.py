@@ -84,7 +84,7 @@ class GammaSpectrum:
         print(f"Initial noise level: {estimate_noise(self.counts):.2f}")
         print("Filtering data...")
         self.counts = gaussian_filter1d(self.counts, sigma=1)
-        self.name += "_GAUSS_smooth"
+        self.name += "_filtered"
         print(f"Resulting noise level: {estimate_noise(self.counts):.2f}")
 
     def fill_channels(self):
@@ -117,8 +117,7 @@ class GammaSpectrum:
 
     def save_raw(self, out_directory: str, output_energies=False, filename_suffix="") -> None:
         data = self.energies if output_energies else self.channels
-        data_type = "_energies" if output_energies else ""
-        name_suffix = f"{data_type}_PROCESSED{filename_suffix}.csv"
+        name_suffix = f"{filename_suffix}.csv"
         out_filename = self.name + name_suffix
         out_path = os.path.join(out_directory, out_filename)
         if not os.path.exists(out_directory):
@@ -225,8 +224,8 @@ class SpectrumProcessor:
                              in zip(spectrum.counts, background_spectrum.counts)]
 
         result.fill_energies()
-        result.name = f"{spectrum.name}_BG_SUBTRACTED"
-        if significance > 0:
+        result.name = f"{spectrum.name}_NO_BG"
+        if significance:
             result.name += f"_{significance}-sigma_significance"
         result.file_extension = ".csv"
         return result

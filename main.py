@@ -1,11 +1,9 @@
-from config import DetectorType
 from gamma_spectrum import GammaSpectrum, SpectrumProcessor
 from misc import get_filenames
 import os
 import config
 from plotter import Plotter
 import re
-import numpy as np
 
 """
 (!) Edit the config.py file to use correct file paths
@@ -56,7 +54,6 @@ def sum_spectra(input_spectra: list[GammaSpectrum]) -> list[GammaSpectrum]:
         result = processor.sum_spectra(spectra, name_modifier=shot_name)
         out_path = config.save_paths["sums"][result.detector.type]
 
-        # out_path = config.save_paths["sum_spectra"][result.detector.type]
         print(f"[y] - Save {result.name} to default directory\n"
               f"[n] - Continue without saving\n"
               f"'your_custom_path' - Save to the specified location")
@@ -102,9 +99,12 @@ def add_energies_remove_headers(input_spectra: list[GammaSpectrum]) -> list[Gamm
         for spectrum in input_spectra:
             if use_energy_scale == "y":
                 out_directory = config.save_paths["processed"][spectrum.detector.type]["energy_scale"]
+                suffix = "_energies"
             else:
                 out_directory = config.save_paths["processed"][spectrum.detector.type]["counts"]
-            spectrum.save_raw(out_directory=out_directory, output_energies=use_energy_scale == "y")
+                suffix = "_counts"
+            spectrum.save_raw(out_directory=out_directory, output_energies=use_energy_scale == "y",
+                              filename_suffix=suffix)
             processed_spectra.append(spectrum)
 
         return processed_spectra
