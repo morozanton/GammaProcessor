@@ -24,11 +24,15 @@ def get_detector_from_filename(filename: str) -> DetectorType | None:
         raise ValueError("Unknown detector type")
 
 
+def check_file_extension(path: str, *supported_extensions: str) -> bool:
+    return os.path.splitext(os.path.basename(path))[1].lower() in [ext.lower() for ext in supported_extensions]
+
+
 def get_filenames(directory: str, *extension: str) -> list[str]:
     if extension:
         files = []
         for file in os.listdir(directory):
-            if os.path.splitext(os.path.basename(file))[1].lower() in [ext.lower() for ext in extension]:
-                files.append(file)
+            if check_file_extension(file, *extension):
+                files.append(os.path.join(directory, file))
         return sorted(files, key=lambda x: int(re.search(r"\d+", x).group(0)))
     return os.listdir(directory)

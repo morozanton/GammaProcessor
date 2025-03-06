@@ -1,5 +1,5 @@
 from gamma_spectrum import GammaSpectrum, SpectrumProcessor
-from misc import get_filenames
+from misc import get_filenames, check_file_extension
 import os
 import config
 from plotter import Plotter
@@ -10,7 +10,7 @@ import re
 """
 
 
-def load_files(message: str, path='') -> list | GammaSpectrum:
+def get_files(message: str, path='') -> list:
     ATTEMPTS = 3
     for _ in range(ATTEMPTS):
         if not path:
@@ -20,13 +20,16 @@ def load_files(message: str, path='') -> list | GammaSpectrum:
         else:
             input_path = path
         if os.path.isdir(input_path):
-            files = get_filenames(input_path, ".Spe", ".csv")
+            files = get_filenames(input_path, *config.SUPPORTED_FILE_EXTENSIONS)
             if files:
-                return processor.load_multiple_spectra(input_path)
+                return files
             else:
                 print(f"No supported files found in {input_path}")
         elif os.path.isfile(input_path):
-            return [GammaSpectrum().load(input_path)]
+            if check_file_extension(input_path, *config.SUPPORTED_FILE_EXTENSIONS):
+                return [input_path]
+            else:
+                print(f"{input_path}: file format is unsupported")
     raise FileExistsError("Max number of attempts reached")
 
 
@@ -70,7 +73,7 @@ def sum_spectra(input_spectra: list[GammaSpectrum]) -> list[GammaSpectrum]:
         print(f"No .Spe files found to sum.")
 
 
-def subtract_background(input_spectra: list[GammaSpectrum]) -> list[GammaSpectrum]:
+def subtract_background(input_spectra: list[GammaSpectrum], out_format="json") -> list[GammaSpectrum]:
     if input_spectra:
         processed_spectra = []
         print(f"Background will be subtracted from {len(input_spectra)} files")
@@ -78,16 +81,32 @@ def subtract_background(input_spectra: list[GammaSpectrum]) -> list[GammaSpectru
                                         "(0 = preserve all nonzero counts): \n"
                                         "---> ").strip())
 
-        for spectrum in input_spectra:
-            result = processor.subtract_background(spectrum=spectrum, significance=significance_prompt)
+        for sp in input_spectra:
+            result = processor.subtract_background(spectrum=sp, significance=significance_prompt)
             out_directory = config.save_paths["processed"][result.detector.type]["bg_subtracted"]
-            result.save_raw(out_directory)
+            if out_format == "json":
+                result.save_json(out_directory)
+            elif out_format in ["raw", "csv"]:
+                result.save_raw(out_directory)
             processed_spectra.append(result)
 
         return processed_spectra
 
 
-def add_energies_remove_headers(input_spectra: list[GammaSpectrum]) -> list[GammaSpectrum]:
+def select_output_format() -> str:
+    prompt = input("Select the output file format:\n"
+                   "[j] = .json\n"
+                   "[c] = .csv\n"
+                   "---> ").strip().lower()
+    if prompt in ["j", "json", ".json"]:
+        return "json"
+    elif prompt in ["c", "csv", ".csv"]:
+        return "csv"
+    else:
+        raise TypeError("Could not determine the output file format")
+
+
+def add_energies_remove_headers(input_spectra: list[GammaSpectrum], out_format="json") -> list[GammaSpectrum]:
     if input_spectra:
         processed_spectra = []
         print(f"{len(input_spectra)} files will be processed.")
@@ -96,32 +115,48 @@ def add_energies_remove_headers(input_spectra: list[GammaSpectrum]) -> list[Gamm
                                  "[n] output channel numbers\n"
                                  "---> ").strip().lower()
 
-        for spectrum in input_spectra:
+        for sp in input_spectra:
             if use_energy_scale == "y":
-                out_directory = config.save_paths["processed"][spectrum.detector.type]["energy_scale"]
+                out_directory = config.save_paths["processed"][sp.detector.type]["energy_scale"]
                 suffix = "_energies"
             else:
-                out_directory = config.save_paths["processed"][spectrum.detector.type]["counts"]
+                out_directory = config.save_paths["processed"][sp.detector.type]["counts"]
                 suffix = "_counts"
-            spectrum.save_raw(out_directory=out_directory, output_energies=use_energy_scale == "y",
-                              filename_suffix=suffix)
-            processed_spectra.append(spectrum)
+            if out_format == "json":
+                sp.save_json(out_directory=out_directory,
+                             filename_suffix=suffix)
+            elif out_format in ["raw", "csv"]:
+                sp.save_raw(out_directory=out_directory, output_energies=use_energy_scale == "y",
+                            filename_suffix=suffix)
+            processed_spectra.append(sp)
 
         return processed_spectra
 
 
-def filter_spectra(input_spectra: list[GammaSpectrum]) -> list[GammaSpectrum]:
+def filter_spectra(input_spectra: list[GammaSpectrum], out_format="json") -> list[GammaSpectrum]:
     if input_spectra:
         processed_spectra = []
 
-        for spectrum in input_spectra:
-            out_directory = config.save_paths["processed"][spectrum.detector.type]["filtered"]
-            spectrum.apply_filtering()
-            processed_spectra.append(spectrum)
-            spectrum.save_raw(
-                out_directory=out_directory,
-                output_energies=True)
+        for sp in input_spectra:
+            out_directory = config.save_paths["processed"][sp.detector.type]["filtered"]
+            sp.apply_filtering()
+            processed_spectra.append(sp)
+            if out_format == "json":
+                sp.save_json(out_directory=out_directory)
+            elif out_format in ["raw", "csv"]:
+                sp.save_raw(out_directory=out_directory, output_energies=True)
+
         return processed_spectra
+
+
+def convert_format(input_spectra: list[GammaSpectrum], output_format: str, save_path=config.processed_path):
+    for sp in input_spectra:
+        if output_format == "json":
+            sp.save_json(save_path)
+        elif output_format == "csv":
+            sp.save_raw(save_path, output_energies=sp.energies is not None)
+        print(f"{sp.name} saved")
+    print(f"All files saved in {save_path}")
 
 
 print(config.logo)
@@ -133,12 +168,12 @@ iteration = 0
 while True:
     if iteration == 0:
         print()
-        spectra = load_files(message="Path to a spectrum file/directory: ")
+        spectra = processor.load_multiple_spectra(get_files(message="Path to a spectrum file/directory: "))
 
     print(f"\nCurrent files:")
     print("-" * 30)
-    for i, sp in enumerate(spectra):
-        print(f"{i + 1}. {sp.name}")
+    for i, spectrum in enumerate(spectra):
+        print(f"{i + 1}. {spectrum.name}")
     print("-" * 30)
     print("[1] Bulk processing: sum spectra + subtract background + add energy scale\n"
           "[2] Sum spectra\n"
@@ -148,36 +183,46 @@ while True:
           "[6] Plot spectra\n"
           "\n[n] Load NEW spectra\n"
           "[a] Load ADDITIONAL spectra\n"
+          "\n[f] Convert the spectrum file format\n"
           "\n[q] Quit")
     command = input("---> ").strip().lower()
     match command:
         case "1":
             add_energies_remove_headers(subtract_background(sum_spectra(spectra)))
-            spectra = load_files(message="\nAll files are processed. Load new files to process?"
-                                         "\nPath to a spectrum file/directory: ")
+            spectra = processor.load_multiple_spectra(
+                get_files(message="\nAll files are processed. Load new files to process?"
+                                  "\nPath to a spectrum file/directory: "))
 
         case "2":
             spectra = sum_spectra(spectra)
 
         case "3":
-            spectra = subtract_background(spectra)
+            out_format = select_output_format()
+            spectra = subtract_background(spectra, out_format=out_format)
 
         case "4":
-            spectra = add_energies_remove_headers(spectra)
+            out_format = select_output_format()
+            spectra = add_energies_remove_headers(spectra, out_format=out_format)
 
         case "5":
-            spectra = filter_spectra(spectra)
+            out_format = select_output_format()
+            spectra = filter_spectra(spectra, out_format=out_format)
 
         case "6":
-            prompt = input("Also plot background? [y/n]: ").strip().lower()
-            plotter.plot_spectrum(*spectra, plot_background=prompt == "y", background_significance=3)
+            plot_background = input("Also plot background? [y/n]: ").strip().lower() == "y"
+            plotter.plot_spectrum(*spectra, plot_background=plot_background, background_significance=3)
 
         case "n":
-            spectra = load_files(message="Path to a spectrum file/directory: ")
+            spectra = processor.load_multiple_spectra(get_files(message="Path to a spectrum file/directory: "))
 
         case "a":
-            spectra.extend(
-                load_files(message="Path to an additional spectrum file/directory: "))
+            spectra.extend(processor.load_multiple_spectra(get_files(
+                message="Path to an additional spectrum file/directory: "
+            )))
+
+        case "f":
+            out_format = select_output_format()
+            convert_format(spectra, out_format)
 
         case "999":
             # Sum up ALL files for ALL shots from a given detector
@@ -190,7 +235,7 @@ while True:
             for direct in dirs:
                 direct = os.path.join(root, direct, "Messungen")
                 try:
-                    spectra = load_files(message="", path=direct)
+                    spectra = processor.load_multiple_spectra(get_files(message="Path to a spectrum file/directory: "))
                 except FileExistsError:
                     continue
 
@@ -201,10 +246,10 @@ while True:
                         f"{valid_spectra[0].name}{valid_spectra[0].file_extension} "
                         f"to {valid_spectra[-1].name}{valid_spectra[-1].file_extension}")
                     print()
-                    shot_name = re.match(r"Shot_\d+", valid_spectra[0].name).group(0)
+                    shot = re.match(r"Shot_\d+", valid_spectra[0].name).group(0)
                     detector = spectra[0].detector
 
-                    result = processor.sum_spectra(spectra, name_modifier=shot_name)
+                    result = processor.sum_spectra(spectra, name_modifier=shot)
                     out_path = config.save_paths["sums"][result.detector.type]
                     result.save_spe(os.path.join(out_path, result.name + result.file_extension))
                     print(f"{result.name} saved at {out_path}")
