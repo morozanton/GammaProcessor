@@ -34,31 +34,55 @@ class Plotter:
     #     return pd.read_csv(path, sep=delimiter, names=column_names)
 
     @staticmethod
-    def plot_spectrum(*spectra: GammaSpectrum, scale="energy", plot_background=False):
+    def plot_spectrum(*spectra: GammaSpectrum, scale="energy", plot_background=False, background_significance=0):
         if scale == "energy":
             fig = go.Figure()
+
             for spectrum in spectra:
                 fig.add_trace(go.Scatter(
                     x=spectrum.energies,
                     y=spectrum.counts,
                     mode='lines',
                     name=spectrum.name,
-                    # line=dict(color=Plotter.colors[spectrum.detector.type]),
-                    fill="tozeroy"
+                    line=dict(color=Plotter.colors[spectrum.detector.type]) if len(spectra) == 1 else None,
+                    fill="none" #"tozeroy"
                 ))
+
             if plot_background:
-                spectrum_time = float(input("Spectrum measurement time is required for background plotting.\n"
-                                            "Enter the time (in sec.): ").strip())
+                spectrum_time = spectra[0].times[0] if len(spectra) == 1 and spectra[0].times else float(
+                    input("Spectrum measurement time is required for background plotting.\n"
+                          "Enter the time (in sec.): ").strip())
                 background_spectrum = SpectrumProcessor().get_normalized_background(spectra[0].detector.type,
                                                                                     spectrum_time)
+                min_nonzero_bg = min(bg for bg in background_spectrum.counts if bg > 0)
+                background_spectrum.counts = [bg if bg > 0 else min_nonzero_bg for bg in background_spectrum.counts]
                 fig.add_trace(go.Scatter(
                     x=background_spectrum.energies,
                     y=background_spectrum.counts,
                     mode='lines',
                     name="Background",
                     line=dict(color="grey"),
-                    fill="tozeroy"
+                    # fill="tozeroy"
+                    fill="none"
                 ))
+                if background_significance:
+                    # Adding the significance interval
+                    fig.add_trace(go.Scatter(
+                        x=background_spectrum.energies,
+                        y=[x + background_significance * np.sqrt(x) for x in background_spectrum.counts],
+                        mode='lines',
+                        line=dict(color="grey"),
+                        showlegend=False,
+                        fill="none"
+                    ))
+                    fig.add_trace(go.Scatter(
+                        x=background_spectrum.energies,
+                        y=[x - background_significance * np.sqrt(x) for x in background_spectrum.counts],
+                        mode='lines',
+                        name="±3σ region",
+                        line=dict(color="grey"),
+                        fill="tonexty"
+                    ))
 
             fig.update_layout(
                 xaxis=dict(

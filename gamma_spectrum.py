@@ -211,9 +211,18 @@ class SpectrumProcessor:
         result.channels = spectrum.channels
 
         scaling_factor = spectrum.times[0] / detector.bg_times[0]
-        threshold = significance ** 2  # Because count has to be > significance * sigma, and sigma = sqrt(count)
-        result.counts = [spec - bg * scaling_factor if spec - bg * scaling_factor >= threshold else 0 for spec, bg in
-                         zip(spectrum.counts, background_spectrum.counts)]
+
+        if significance:
+            min_nonzero_bg = min(bg for bg in background_spectrum.counts if bg > 0)
+            result.counts = []
+            for bg, cnt in zip(background_spectrum.counts, spectrum.counts):
+                bg_scaled = bg * scaling_factor if bg > 0 else min_nonzero_bg * scaling_factor
+                threshold = np.sqrt(bg_scaled) + bg_scaled
+                cnt_new = cnt - bg_scaled
+                result.counts.append(cnt_new) if cnt_new > threshold else result.counts.append(0)
+        else:
+            result.counts = [spec - bg * scaling_factor if spec - bg * scaling_factor > 0 else 0 for spec, bg
+                             in zip(spectrum.counts, background_spectrum.counts)]
 
         result.fill_energies()
         result.name = f"{spectrum.name}_BG_SUBTRACTED"

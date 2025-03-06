@@ -170,7 +170,7 @@ while True:
 
         case "6":
             prompt = input("Also plot background? [y/n]: ").strip().lower()
-            plotter.plot_spectrum(*spectra, plot_background=prompt == "y")
+            plotter.plot_spectrum(*spectra, plot_background=prompt == "y", background_significance=3)
 
         case "n":
             spectra = load_files(message="Path to a spectrum file/directory: ")
