@@ -96,7 +96,7 @@ class GammaSpectrum:
 
         print(f"Initial noise level: {estimate_noise(self.counts):.2f}")
         print("Filtering data...")
-        self.counts = gaussian_filter1d(self.counts, sigma=1)
+        self.counts = list(gaussian_filter1d(self.counts, sigma=1))
         self.name += "_filtered"
         print(f"Resulting noise level: {estimate_noise(self.counts):.2f}")
 
@@ -172,20 +172,6 @@ class GammaSpectrum:
 
 
 class SpectrumProcessor:
-    # @staticmethod
-    # def load_multiple_spectra(path) -> list[GammaSpectrum] | None:
-    #     spectra = []
-    #     path = path.strip('"')
-    #
-    #     if os.path.isdir(path):
-    #         for filename in misc.get_filenames(path, *config.SUPPORTED_FILE_EXTENSIONS):
-    #             spectra.append(GammaSpectrum().load(os.path.join(path, filename)))
-    #     elif os.path.isfile(path):
-    #         spectra.append(GammaSpectrum().load(path))
-    #     else:
-    #         print(f"No supported files found in {path}")
-    #         return None
-    #     return spectra
     @staticmethod
     def load_multiple_spectra(files: list) -> list[GammaSpectrum] | None:
         return [GammaSpectrum().load(os.path.join(filename)) for filename in files]

@@ -29,7 +29,8 @@ class Plotter:
         plt.show()
 
     @staticmethod
-    def plot_spectrum(*spectra: GammaSpectrum, scale="energy", plot_background=False, background_significance=0):
+    def plot_spectrum(*spectra: GammaSpectrum, scale="energy", plot_background=False, background_significance=0,
+                      xlim=None, ylim=None):
         if scale == "energy":
             fig = go.Figure()
 
@@ -51,13 +52,14 @@ class Plotter:
                                                                                     spectrum_time)
                 min_nonzero_bg = min(bg for bg in background_spectrum.counts if bg > 0)
                 background_spectrum.counts = [bg if bg > 0 else min_nonzero_bg for bg in background_spectrum.counts]
+
+                # Adding the normalized background line
                 fig.add_trace(go.Scatter(
                     x=background_spectrum.energies,
                     y=background_spectrum.counts,
                     mode='lines',
                     name="Background",
-                    line=dict(color="grey"),
-                    # fill="tozeroy"
+                    line=dict(color="rgb(35,35,35)"),
                     fill="none"
                 ))
                 if background_significance:
@@ -67,31 +69,25 @@ class Plotter:
                         y=[x + background_significance * np.sqrt(x) for x in background_spectrum.counts],
                         mode='lines',
                         line=dict(color="grey"),
-                        showlegend=False,
-                        fill="none"
-                    ))
-                    fig.add_trace(go.Scatter(
-                        x=background_spectrum.energies,
-                        y=[x - background_significance * np.sqrt(x) for x in background_spectrum.counts],
-                        mode='lines',
-                        name="±3σ region",
-                        line=dict(color="grey"),
-                        fill="tonexty"
+                        name="+3σ region",
+                        fill="tozeroy"
                     ))
 
             fig.update_layout(
                 xaxis=dict(
                     title="Energy (keV)",
-                    title_font=dict(size=18),
-                    tickfont=dict(size=14)
+                    title_font=dict(size=22),
+                    tickfont=dict(size=18),
+                    range=xlim
                 ),
                 yaxis=dict(
                     title="Counts",
-                    title_font=dict(size=18),
-                    tickfont=dict(size=14)
+                    title_font=dict(size=22),
+                    tickfont=dict(size=18),
+                    range=ylim
                 ),
                 legend=dict(
-                    font=dict(size=16)
+                    font=dict(size=18)
                 )
             )
 

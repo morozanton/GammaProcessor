@@ -210,7 +210,10 @@ while True:
 
         case "6":
             plot_background = input("Also plot background? [y/n]: ").strip().lower() == "y"
-            plotter.plot_spectrum(*spectra, plot_background=plot_background, background_significance=3)
+            # xlim = [470, 520]
+            # ylim = [0, 90]
+            plotter.plot_spectrum(*spectra, plot_background=plot_background, background_significance=3, xlim=xlim,
+                                  ylim=ylim)
 
         case "n":
             spectra = processor.load_multiple_spectra(get_files(message="Path to a spectrum file/directory: "))
