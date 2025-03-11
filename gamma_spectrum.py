@@ -177,17 +177,25 @@ class SpectrumProcessor:
         return [GammaSpectrum().load(os.path.join(filename)) for filename in files]
 
     @staticmethod
-    def sum_spectra(spectra: list[GammaSpectrum], name_modifier: str) -> GammaSpectrum:
+    def sum_spectra(spectra: list[GammaSpectrum], name_modifier: str, start=0, end=-1) -> GammaSpectrum:
         """
         Sums spectra counts and times from the list and returns the resulting spectrum
         :param spectra: The spectra to sum
         :param name_modifier: The resulting file will be saved as
         "SumSpectra{detector}{name_modifier}-{name_prefix}_to_{name_suffix}.Spe"
+        :param start:
+        :param end:
         :return: A new GammaSpectrum consisting of the summed up counts
         """
 
         def get_file_number(file) -> str:
             return re.search(r"(\d{3})", file).group(1)
+
+        if start > 0:
+            spectra = sorted(spectra, key=lambda s: int(re.search(r"\d{3,}$", s.name).group()))
+            first_index = next((i for i, spectrum in enumerate(spectra) if
+                                int(re.search(r"(\d{3,})$", spectrum.name).group()) == start))
+            spectra = spectra[first_index:]
 
         result = GammaSpectrum()
         for i, spectrum in enumerate(spectra):
@@ -207,7 +215,9 @@ class SpectrumProcessor:
                 name_suffix = get_file_number(spectrum.name)
                 result.name = f"SumSpectra{result.detector.name}{name_modifier}-{name_prefix}_to_{name_suffix}"
                 result.file_extension = ".Spe"
+        result.times = result.times.tolist()
         result.fill_channels()
+        result.fill_energies()
         return result
 
     @staticmethod

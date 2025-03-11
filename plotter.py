@@ -45,7 +45,7 @@ class Plotter:
                 ))
 
             if plot_background:
-                spectrum_time = spectra[0].times[0] if len(spectra) == 1 and spectra[0].times else float(
+                spectrum_time = spectra[0].times[0] if len(spectra) == 1 and len(spectra[0].times) > 0 else float(
                     input("Spectrum measurement time is required for background plotting.\n"
                           "Enter the time (in sec.): ").strip())
                 background_spectrum = SpectrumProcessor().get_normalized_background(spectra[0].detector.type,
@@ -87,8 +87,8 @@ class Plotter:
                     range=ylim
                 ),
                 legend=dict(
-                    font=dict(size=18)
+                    font=dict(size=22)
                 )
             )
 
-            fig.show()
+            fig.show(config={"toImageButtonOptions": {"filename": spectra[0].name}})

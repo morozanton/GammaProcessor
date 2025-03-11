@@ -43,8 +43,6 @@ def sum_spectra(input_spectra: list[GammaSpectrum]) -> list[GammaSpectrum]:
         valid_spectra = [sp for sp in input_spectra if sp.file_extension == ".Spe"]
         names = [sp.name for sp in valid_spectra]
 
-        print(f"The files from {valid_spectra[0].name} to {valid_spectra[-1].name} will be summed")
-
         shot_names = {match.group() for name in names if (match := re.search(r"Shot_\d+", name))}
         sorted_names = sorted(shot_names, key=lambda x: int(x.split("_")[1]))
         if len(shot_names) > 1:
@@ -54,7 +52,20 @@ def sum_spectra(input_spectra: list[GammaSpectrum]) -> list[GammaSpectrum]:
         else:
             shot_name = None
 
-        result = processor.sum_spectra(spectra, name_modifier=shot_name)
+        prompt_start = input(f"[a] - sum all files ({valid_spectra[0].name} to {valid_spectra[-1].name})\n"
+                             f"['number'] sum files starting from 'number'\n"
+                             f"---> ").strip()
+
+        i_start = int(prompt_start) if prompt_start.isdigit() else 0
+
+        if prompt_start != "a":
+            prompt_end = input(f"[a] - sum all files ({valid_spectra[i_start].name} to {valid_spectra[-1].name})\n"
+                               f"['number'] sum files UNTIL 'number'\n"
+                               f"---> ").strip()
+
+            i_end = int(prompt_end) if prompt_end.isdigit() else -1
+
+        result = processor.sum_spectra(spectra, name_modifier=shot_name, start=i_start, end=i_end)
         out_path = config.save_paths["sums"][result.detector.type]
 
         print(f"[y] - Save {result.name} to default directory\n"
@@ -175,7 +186,7 @@ while True:
     for i, spectrum in enumerate(spectra):
         print(f"{i + 1}. {spectrum.name}")
     print("-" * 30)
-    print("[1] Bulk processing: sum spectra + subtract background + add energy scale\n"
+    print("[1] Bulk processing: sum spectra + subtract background + apply filtering\n"
           "[2] Sum spectra\n"
           "[3] Subtract background\n"
           "[4] Add channels/energies; remove header and footer\n"
@@ -188,10 +199,7 @@ while True:
     command = input("---> ").strip().lower()
     match command:
         case "1":
-            add_energies_remove_headers(subtract_background(sum_spectra(spectra)))
-            spectra = processor.load_multiple_spectra(
-                get_files(message="\nAll files are processed. Load new files to process?"
-                                  "\nPath to a spectrum file/directory: "))
+            spectra = filter_spectra(subtract_background(sum_spectra(spectra)))
 
         case "2":
             spectra = sum_spectra(spectra)
@@ -210,10 +218,10 @@ while True:
 
         case "6":
             plot_background = input("Also plot background? [y/n]: ").strip().lower() == "y"
-            # xlim = [470, 520]
-            # ylim = [0, 90]
+            xlim = [470, 520]
+            ylim = [0, int(input("ylim= "))]
             plotter.plot_spectrum(*spectra, plot_background=plot_background, background_significance=3, xlim=xlim,
-                                  ylim=ylim)
+                                  ylim=ylim, scale="energy")
 
         case "n":
             spectra = processor.load_multiple_spectra(get_files(message="Path to a spectrum file/directory: "))
