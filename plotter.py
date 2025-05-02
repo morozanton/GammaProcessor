@@ -1,3 +1,6 @@
+import os.path
+
+import config
 from config import DetectorType
 from gamma_spectrum import GammaSpectrum, SpectrumProcessor
 import matplotlib.pyplot as plt
@@ -45,50 +48,56 @@ class Plotter:
                 ))
 
             if plot_background:
-                spectrum_time = spectra[0].times[0] if len(spectra) == 1 and len(spectra[0].times) > 0 else float(
-                    input("Spectrum measurement time is required for background plotting.\n"
-                          "Enter the time (in sec.): ").strip())
-                background_spectrum = SpectrumProcessor().get_normalized_background(spectra[0].detector.type,
-                                                                                    spectrum_time)
-                min_nonzero_bg = min(bg for bg in background_spectrum.counts if bg > 0)
-                background_spectrum.counts = [bg if bg > 0 else min_nonzero_bg for bg in background_spectrum.counts]
+                for spectrum in spectra:
+                    spectrum_time = spectrum.times[0] if len(spectrum.times) > 0 else float(
+                        input("Spectrum measurement time is required for background plotting.\n"
+                              f"Enter the time for {spectrum.name}  (in sec.): ").strip())
+                    background_spectrum = SpectrumProcessor().get_normalized_background(spectrum.detector.type,
+                                                                                        spectrum_time)
+                    min_nonzero_bg = min(bg for bg in background_spectrum.counts if bg > 0)
+                    background_spectrum.counts = [bg if bg > 0 else min_nonzero_bg for bg in background_spectrum.counts]
 
-                # Adding the normalized background line
-                fig.add_trace(go.Scatter(
-                    x=background_spectrum.energies,
-                    y=background_spectrum.counts,
-                    mode='lines',
-                    name="Background",
-                    line=dict(color="rgb(35,35,35)"),
-                    fill="none"
-                ))
-                if background_significance:
-                    # Adding the significance interval
+                    # Adding the normalized background line
                     fig.add_trace(go.Scatter(
                         x=background_spectrum.energies,
-                        y=[x + background_significance * np.sqrt(x) for x in background_spectrum.counts],
+                        y=background_spectrum.counts,
                         mode='lines',
-                        line=dict(color="grey"),
-                        name="+3σ region",
-                        fill="tozeroy"
+                        name="Background",
+                        line=dict(color="rgb(35,35,35)"),
+                        fill="none"
                     ))
+                    if background_significance:
+                        # Adding the significance interval
+                        fig.add_trace(go.Scatter(
+                            x=background_spectrum.energies,
+                            y=[x + background_significance * np.sqrt(x) for x in background_spectrum.counts],
+                            mode='lines',
+                            line=dict(color="grey"),
+                            name="Background +3σ",
+                            fill="tozeroy"
+                        ))
 
             fig.update_layout(
                 xaxis=dict(
                     title="Energy (keV)",
                     title_font=dict(size=22),
                     tickfont=dict(size=18),
-                    range=xlim
+                    range=xlim,
+                    gridcolor="#f0f0f0"
                 ),
                 yaxis=dict(
                     title="Counts",
                     title_font=dict(size=22),
                     tickfont=dict(size=18),
-                    range=ylim
+                    range=ylim,
+                    gridcolor="#f0f0f0",
+                    # type="log",
+                    # tickformat=".0e"
                 ),
                 legend=dict(
                     font=dict(size=22)
-                )
+                ),
+                plot_bgcolor="#ffffff",
             )
 
-            fig.show(config={"toImageButtonOptions": {"filename": spectra[0].name}})
+            fig.show(config={"toImageButtonOptions": {"filename": spectra[0].name}}, renderer="browser")
